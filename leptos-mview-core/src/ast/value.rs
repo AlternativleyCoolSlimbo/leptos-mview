@@ -87,16 +87,15 @@ impl ToTokens for Value {
                 prefixes,
                 brackets,
             } => {
-                if let Some(prefixes) = prefixes {
+                if let Some(prefix) = prefixes {
                     // only f[] is supported for now
-                    if prefixes == "f" {
-                        let format = quote_spanned!(prefixes.span()=> format!);
+                    if prefix == "f" {
+                        let format = quote_spanned!(prefix.span()=> format!);
                         quote_spanned!(brackets.span.join()=> move || ::std::#format(#tokens))
+                    } else if prefix == "a" {
+                        quote_spanned!(brackets.span.join()=> move |#[allow(unused_variables)] a| {#tokens})
                     } else {
-                        emit_error!(
-                            prefixes.span(),
-                            "unsupported prefix: only `f` is supported."
-                        );
+                        emit_error!(prefix.span(), "unsupported prefix: only `f` is supported.");
                         quote! {}
                     }
                 } else {
